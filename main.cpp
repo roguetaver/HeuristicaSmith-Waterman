@@ -12,6 +12,26 @@ struct termo
     int valor;
 };
 
+int maxVal(int diag, int del, int ins)
+{
+    if (diag >= del and diag >= ins and diag >= 0)
+    {
+        return diag;
+    }
+    else if (del >= ins and del >= 0)
+    {
+        return del;
+    }
+    else if (ins >= 0)
+    {
+        return ins;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 int main()
 {
     vector<vector<int>> H;
@@ -33,23 +53,23 @@ int main()
 
     // print das sequencias A e B assim como seus respectivos tamanhos
     cout << "-------------------------------------" << endl;
-    cout << "Tamanho de A (m) = " << m - 1 << endl;
+    cout << "Tamanho de A (n) = " << n << endl;
     cout << "Sequencia A = " << seqA << endl;
     cout << "-------------------------------------" << endl;
-    cout << "Tamanho de B (n) = " << n - 1 << endl;
+    cout << "Tamanho de B (m) = " << m << endl;
     cout << "Sequencia B = " << seqB << endl;
 
     // inicializando matriz H com zeros
-    H.resize(n);
-    for (int i = 0; i < n; i++)
+    H.resize(n + 1);
+    for (int i = 0; i <= n; i++)
     {
-        H[i].resize(m);
+        H[i].resize(m + 1);
     }
 
     // criando a matriz H
-    for (int i = 1; i < n; i++)
+    for (int i = 1; i <= n; i++)
     {
-        for (int j = 1; j < m; j++)
+        for (int j = 1; j <= m; j++)
         {
             if (seqA[i - 1] == seqB[j - 1])
             {
@@ -64,7 +84,7 @@ int main()
 
             del = H[i - 1][j] - 1;
 
-            H[i][j] = max(diag, max(ins, max(del, 0)));
+            H[i][j] = maxVal(diag, del, ins);
 
             // calculando o valor maximo da matriz H
             if (H[i][j] > valorMaximo)
@@ -80,10 +100,10 @@ int main()
     cout << "-------------------------------------" << endl;
     cout << "Matriz H" << endl;
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i <= n; i++)
     {
         cout << " " << endl;
-        for (int j = 0; j < m; j++)
+        for (int j = 0; j <= m; j++)
         {
             cout << H[i][j] << " ";
         }
@@ -97,7 +117,7 @@ int main()
     termo termoAtual;
     vector<termo> vetorDeTermos;
 
-    termoAtual.token = " ";
+    termoAtual.token = "MaxValue (EndPoint)";
     termoAtual.valor = valorMaximo;
     termoAtual.linha = valorMaximoI;
     termoAtual.coluna = valorMaximoJ;
@@ -118,22 +138,30 @@ int main()
             termoAtual.coluna = termoAtual.coluna - 1;
         }
 
-        else if (ins >= del)
-        {
-            termoAtual.token = "insercao";
-            termoAtual.valor = ins;
-            termoAtual.linha = termoAtual.linha;
-            termoAtual.coluna = termoAtual.coluna - 1;
-        }
-        else
+        else if (del >= ins)
         {
             termoAtual.token = "delecao";
             termoAtual.valor = del;
             termoAtual.linha = termoAtual.linha - 1;
             termoAtual.coluna = termoAtual.coluna;
         }
+        else
+        {
+            termoAtual.token = "insercao";
+            termoAtual.valor = ins;
+            termoAtual.linha = termoAtual.linha;
+            termoAtual.coluna = termoAtual.coluna - 1;
+        }
 
         vetorDeTermos.push_back(termoAtual);
+    }
+    cout << "-------------------------------------" << endl;
+    cout << "caminho percorrido na matriz H (Do ultimo termo para primeiro) : " << endl
+         << endl;
+
+    for (int i = 0; i < int(vetorDeTermos.size()); i++)
+    {
+        cout << vetorDeTermos[i].token << endl;
     }
 
     // apos conseguir o caminho, com seus respectivos movimentos, agora vamos construir as sequencias alinhadas
