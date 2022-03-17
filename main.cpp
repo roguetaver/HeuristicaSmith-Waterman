@@ -130,7 +130,7 @@ int main()
         del = H[termoAtual.linha - 1][termoAtual.coluna];
         ins = H[termoAtual.linha][termoAtual.coluna - 1];
 
-        if (diag >= del and diag >= ins)
+        if (diag + 2 >= del and diag + 2 >= ins)
         {
             termoAtual.token = "diagonal";
             termoAtual.valor = diag;
