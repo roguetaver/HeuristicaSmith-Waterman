@@ -1,7 +1,16 @@
-#include <iostream>
-#include <vector>
+#include <iostream>  // std::cout
+#include <algorithm> // std::reverse
+#include <vector>    // std::vector
 
 using namespace std;
+
+struct termo
+{
+    string token;
+    int linha;
+    int coluna;
+    int valor;
+};
 
 int main()
 {
@@ -17,13 +26,20 @@ int main()
     string seqA;
     string seqB;
 
-    // recebendo as sequencias a e b e seus respectivos tamanhos
-    cin >> m;
     cin >> n;
+    cin >> m;
     cin >> seqA;
     cin >> seqB;
 
-    // inicializando matriz H
+    // print das sequencias A e B assim como seus respectivos tamanhos
+    cout << "-------------------------------------" << endl;
+    cout << "Tamanho de A (m) = " << m - 1 << endl;
+    cout << "Sequencia A = " << seqA << endl;
+    cout << "-------------------------------------" << endl;
+    cout << "Tamanho de B (n) = " << n - 1 << endl;
+    cout << "Sequencia B = " << seqB << endl;
+
+    // inicializando matriz H com zeros
     H.resize(n);
     for (int i = 0; i < n; i++)
     {
@@ -35,7 +51,7 @@ int main()
     {
         for (int j = 1; j < m; j++)
         {
-            if (seqA[i] == seqB[j])
+            if (seqA[i - 1] == seqB[j - 1])
             {
                 diag = H[i - 1][j - 1] + 2;
             }
@@ -60,12 +76,96 @@ int main()
         }
     }
 
-    // print das sequencias A e B e seus respectivos tamanhos assim como o valor Maximo da matriz H
-    cout << "tamanho de a (m) = " << m << endl;
-    cout << "a = " << seqA << endl;
-    cout << "tamanho de b (n) = " << n << endl;
-    cout << "b = " << seqB << endl;
-    cout << "Valor Máximo: " << valorMaximo << endl;
+    // printando matriz H assim como o valor Maximo da matriz H
+    cout << "-------------------------------------" << endl;
+    cout << "Matriz H" << endl;
+
+    for (int i = 0; i < n; i++)
+    {
+        cout << " " << endl;
+        for (int j = 0; j < m; j++)
+        {
+            cout << H[i][j] << " ";
+        }
+    }
+    cout << "" << endl;
+    cout << endl
+         << "Valor Máximo da matriz H: " << valorMaximo << endl;
+    cout << "Localizado em i = " << valorMaximoI << " e localizado em j = " << valorMaximoJ << endl;
+
+    // obtenção do caminho com melhor valor
+    termo termoAtual;
+    vector<termo> vetorDeTermos;
+
+    termoAtual.token = " ";
+    termoAtual.valor = valorMaximo;
+    termoAtual.linha = valorMaximoI;
+    termoAtual.coluna = valorMaximoJ;
+
+    vetorDeTermos.push_back(termoAtual);
+
+    while (termoAtual.valor != 0)
+    {
+        diag = H[termoAtual.linha - 1][termoAtual.coluna - 1];
+        del = H[termoAtual.linha - 1][termoAtual.coluna];
+        ins = H[termoAtual.linha][termoAtual.coluna - 1];
+
+        if (diag >= del and diag >= ins)
+        {
+            termoAtual.token = "diagonal";
+            termoAtual.valor = diag;
+            termoAtual.linha = termoAtual.linha - 1;
+            termoAtual.coluna = termoAtual.coluna - 1;
+        }
+
+        else if (ins >= del)
+        {
+            termoAtual.token = "insercao";
+            termoAtual.valor = ins;
+            termoAtual.linha = termoAtual.linha;
+            termoAtual.coluna = termoAtual.coluna - 1;
+        }
+        else
+        {
+            termoAtual.token = "delecao";
+            termoAtual.valor = del;
+            termoAtual.linha = termoAtual.linha - 1;
+            termoAtual.coluna = termoAtual.coluna;
+        }
+
+        vetorDeTermos.push_back(termoAtual);
+    }
+
+    // apos conseguir o caminho, com seus respectivos movimentos, agora vamos construir as sequencias alinhadas
+    reverse(vetorDeTermos.begin(), vetorDeTermos.end());
+
+    string seqA_alinhada = "";
+    string seqB_alinhada = "";
+
+    for (int i = 0; i < int(vetorDeTermos.size()); i++)
+    {
+        if (vetorDeTermos[i].token == "diagonal")
+        {
+            seqA_alinhada += seqA[vetorDeTermos[i].linha];
+            seqB_alinhada += seqB[vetorDeTermos[i].coluna];
+        }
+        else if (vetorDeTermos[i].token == "insercao")
+        {
+            seqA_alinhada += "-";
+            seqB_alinhada += seqB[vetorDeTermos[i].coluna];
+        }
+        else if (vetorDeTermos[i].token == "delecao")
+        {
+            seqA_alinhada += seqA[vetorDeTermos[i].linha];
+            seqB_alinhada += "-";
+        }
+    }
+
+    // print das sequencias A e B alinhadas
+    cout << "-------------------------------------" << endl;
+    cout << "Sequencia A alinhada: " << seqA_alinhada << endl;
+    cout << "Sequencia B alinhada: " << seqB_alinhada << endl;
+    cout << "-------------------------------------" << endl;
 
     return valorMaximo;
 }
