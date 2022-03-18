@@ -157,7 +157,7 @@ int main()
     cout << "Localizado em i = " << valorMaximoI << " e localizado em j = " << valorMaximoJ << endl;
 
     // Após criar a matriz H agora partindo do maior score nela
-    // devemos traçar o caminho ideal para chegar no maior valor até atingir zero
+    // devemos traçar o caminho inverso para chegar no maior valor até atingir zero
 
     node termoAtual;
     termoAtual.linha = valorMaximoI;
