@@ -128,7 +128,7 @@ int main()
             }
 
             // calculando o score maximo da matriz H
-            if (H[i][j].valor > valorMaximo)
+            if (H[i][j].valor >= valorMaximo)
             {
                 valorMaximo = H[i][j].valor;
                 valorMaximoI = H[i][j].linha;
