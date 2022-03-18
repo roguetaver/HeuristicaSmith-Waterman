@@ -4,37 +4,43 @@
 
 using namespace std;
 
-struct termo
+// struct de nós para matriz H
+struct node
 {
-    string token;
-    int linha;
-    int coluna;
-    int valor;
+    string token; // movimentos disponiveis (diagonal,insercao e delecao)
+    int linha;    // linha em que o nó se encontra
+    int coluna;   // coluna em que o nó se encontra
+    int valor;    // score do nó
 };
 
-int maxVal(int diag, int del, int ins)
+// funcao que pega o maior valor entre o score da diagonal, delecao e insercao
+// vale a pena notar que a insercao possui prioridade sobre a delecao
+
+string maxVal(int diag, int del, int ins)
 {
     if (diag >= del and diag >= ins and diag >= 0)
     {
-        return diag;
+        return "diagonal";
     }
-    else if (del >= ins and del >= 0)
+    else if (ins >= del and ins >= 0)
     {
-        return del;
+        return "insercao";
     }
-    else if (ins >= 0)
+    else if (del >= 0)
     {
-        return ins;
+        return "delecao";
     }
     else
     {
-        return 0;
+        return "zero";
     }
 }
 
 int main()
 {
-    vector<vector<int>> H;
+    // declarao e iniciação de variaveis
+
+    vector<vector<node>> H;
     int m;
     int n;
     int diag = 0;
@@ -46,12 +52,14 @@ int main()
     string seqA;
     string seqB;
 
+    // recebendo as sequencias A e B assim como seus tamanhos
     cin >> n;
     cin >> m;
     cin >> seqA;
     cin >> seqB;
 
     // print das sequencias A e B assim como seus respectivos tamanhos
+
     cout << "-------------------------------------" << endl;
     cout << "Tamanho de A (n) = " << n << endl;
     cout << "Sequencia A = " << seqA << endl;
@@ -60,6 +68,7 @@ int main()
     cout << "Sequencia B = " << seqB << endl;
 
     // inicializando matriz H com zeros
+
     H.resize(n + 1);
     for (int i = 0; i <= n; i++)
     {
@@ -67,36 +76,69 @@ int main()
     }
 
     // criando a matriz H
+    // cada elemento da matriz H é de tipo node, struct declarada no inicio do codigo
+    // desse modo, cada nó além de possuir seu valor e posição, também possui a direção de onde ele veio
+
     for (int i = 1; i <= n; i++)
     {
         for (int j = 1; j <= m; j++)
         {
             if (seqA[i - 1] == seqB[j - 1])
             {
-                diag = H[i - 1][j - 1] + 2;
+                diag = H[i - 1][j - 1].valor + 2;
             }
             else
             {
-                diag = H[i - 1][j - 1] - 1;
+                diag = H[i - 1][j - 1].valor - 1;
             }
 
-            ins = H[i][j - 1] - 1;
+            ins = H[i][j - 1].valor - 1;
 
-            del = H[i - 1][j] - 1;
+            del = H[i - 1][j].valor - 1;
 
-            H[i][j] = maxVal(diag, del, ins);
+            string tokenAtual = maxVal(diag, del, ins);
 
-            // calculando o valor maximo da matriz H
-            if (H[i][j] > valorMaximo)
+            if (tokenAtual == "diagonal")
             {
-                valorMaximo = H[i][j];
-                valorMaximoI = i;
-                valorMaximoJ = j;
+                H[i][j].valor = diag;
+                H[i][j].linha = i;
+                H[i][j].coluna = j;
+                H[i][j].token = tokenAtual;
+            }
+            else if (tokenAtual == "delecao")
+            {
+                H[i][j].valor = del;
+                H[i][j].linha = i;
+                H[i][j].coluna = j;
+                H[i][j].token = tokenAtual;
+            }
+            else if (tokenAtual == "insercao")
+            {
+                H[i][j].valor = ins;
+                H[i][j].linha = i;
+                H[i][j].coluna = j;
+                H[i][j].token = tokenAtual;
+            }
+            else if (tokenAtual == "zero")
+            {
+                H[i][j].valor = 0;
+                H[i][j].linha = i;
+                H[i][j].coluna = j;
+                H[i][j].token = "diagonal";
+            }
+
+            // calculando o score maximo da matriz H
+            if (H[i][j].valor > valorMaximo)
+            {
+                valorMaximo = H[i][j].valor;
+                valorMaximoI = H[i][j].linha;
+                valorMaximoJ = H[i][j].coluna;
             }
         }
     }
 
-    // printando matriz H assim como o valor Maximo da matriz H
+    // printando a matriz H assim como seu valor Maximo
+
     cout << "-------------------------------------" << endl;
     cout << "Matriz H" << endl;
 
@@ -105,89 +147,57 @@ int main()
         cout << " " << endl;
         for (int j = 0; j <= m; j++)
         {
-            cout << H[i][j] << " ";
+            cout << H[i][j].valor << " ";
         }
     }
+
     cout << "" << endl;
     cout << endl
          << "Valor Máximo da matriz H: " << valorMaximo << endl;
     cout << "Localizado em i = " << valorMaximoI << " e localizado em j = " << valorMaximoJ << endl;
 
-    // obtenção do caminho com melhor valor
-    termo termoAtual;
-    vector<termo> vetorDeTermos;
+    // Após criar a matriz H agora partindo do maior score nela
+    // devemos traçar o caminho ideal para chegar no maior valor até atingir zero
 
-    termoAtual.token = "MaxValue (EndPoint)";
-    termoAtual.valor = valorMaximo;
+    node termoAtual;
     termoAtual.linha = valorMaximoI;
     termoAtual.coluna = valorMaximoJ;
-
-    vetorDeTermos.push_back(termoAtual);
-
-    while (termoAtual.valor != 0)
-    {
-        diag = H[termoAtual.linha - 1][termoAtual.coluna - 1];
-        del = H[termoAtual.linha - 1][termoAtual.coluna];
-        ins = H[termoAtual.linha][termoAtual.coluna - 1];
-
-        if (diag + 2 >= del and diag + 2 >= ins)
-        {
-            termoAtual.token = "diagonal";
-            termoAtual.valor = diag;
-            termoAtual.linha = termoAtual.linha - 1;
-            termoAtual.coluna = termoAtual.coluna - 1;
-        }
-
-        else if (del >= ins)
-        {
-            termoAtual.token = "delecao";
-            termoAtual.valor = del;
-            termoAtual.linha = termoAtual.linha - 1;
-            termoAtual.coluna = termoAtual.coluna;
-        }
-        else
-        {
-            termoAtual.token = "insercao";
-            termoAtual.valor = ins;
-            termoAtual.linha = termoAtual.linha;
-            termoAtual.coluna = termoAtual.coluna - 1;
-        }
-
-        vetorDeTermos.push_back(termoAtual);
-    }
-    cout << "-------------------------------------" << endl;
-    cout << "caminho percorrido na matriz H (Do ultimo termo para primeiro) : " << endl
-         << endl;
-
-    for (int i = 0; i < int(vetorDeTermos.size()); i++)
-    {
-        cout << vetorDeTermos[i].token << endl;
-    }
-
-    // apos conseguir o caminho, com seus respectivos movimentos, agora vamos construir as sequencias alinhadas
-    reverse(vetorDeTermos.begin(), vetorDeTermos.end());
 
     string seqA_alinhada = "";
     string seqB_alinhada = "";
 
-    for (int i = 0; i < int(vetorDeTermos.size()); i++)
+    // abaixo o caminho reverso é traçado a partir do maior score,
+    // chegando assim na sequencia alinhada reversa
+
+    while (termoAtual.valor != 0)
     {
-        if (vetorDeTermos[i].token == "diagonal")
+        if (termoAtual.token == "diagonal")
         {
-            seqA_alinhada += seqA[vetorDeTermos[i].linha];
-            seqB_alinhada += seqB[vetorDeTermos[i].coluna];
+            seqA_alinhada += seqA[termoAtual.linha - 1];
+            seqB_alinhada += seqB[termoAtual.coluna - 1];
+            termoAtual.linha -= 1;
+            termoAtual.coluna -= 1;
         }
-        else if (vetorDeTermos[i].token == "insercao")
+
+        else if (termoAtual.token == "delecao")
+        {
+            seqA_alinhada += seqA[termoAtual.linha - 1];
+            seqB_alinhada += "-";
+            termoAtual.linha -= 1;
+        }
+        else if (termoAtual.token == "insercao")
         {
             seqA_alinhada += "-";
-            seqB_alinhada += seqB[vetorDeTermos[i].coluna];
+            seqB_alinhada += seqB[termoAtual.coluna - 1];
+            termoAtual.coluna -= 1;
         }
-        else if (vetorDeTermos[i].token == "delecao")
-        {
-            seqA_alinhada += seqA[vetorDeTermos[i].linha];
-            seqB_alinhada += "-";
-        }
+        termoAtual.token = H[termoAtual.linha][termoAtual.coluna].token;
+        termoAtual.valor = H[termoAtual.linha][termoAtual.coluna].valor;
     }
+
+    // revertendo as sequencias
+    reverse(seqA_alinhada.begin(), seqA_alinhada.end());
+    reverse(seqB_alinhada.begin(), seqB_alinhada.end());
 
     // print das sequencias A e B alinhadas
     cout << "-------------------------------------" << endl;
